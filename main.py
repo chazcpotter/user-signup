@@ -45,7 +45,7 @@ def build_page(error_username='', error_password='',
     header = "<h1>Signup!</h1>"
     line_br = "<br>"
 
-    form = header + stylecss + ("<form action='/welcome' method='post'> <table> <tr>" +
+    form = header + stylecss + ("<form action='/signup' method='post'> <table> <tr>" +
         user_name_label + user_name_input + error_username + "</tr>" +
         "<tr>" + password_label + password_input + error_password + "</tr> <tr>" +
         verify_password_label + verify_password_input + error_verify + "</tr>" +
@@ -70,7 +70,8 @@ class MainHandler(webapp2.RequestHandler):
     def get(self):
         self.response.write(build_page())
 
-class Welcome(webapp2.RequestHandler):
+class SignUp(webapp2.RequestHandler):
+
     def post(self):
         have_error = False
         username = self.request.get('username')
@@ -81,7 +82,6 @@ class Welcome(webapp2.RequestHandler):
         params = dict(username = username,
             email = email)
 
-        content = "<h1>Welcome, " + username + "!</h1>"
         if not valid_username(username):
             params['error_username'] = "That's not a valid username."
             params['username'] = ''
@@ -114,9 +114,16 @@ class Welcome(webapp2.RequestHandler):
                 params['error_password'],params['error_verify'],
                 params['error_email'], params['username'], params['email']))
         else:
-            self.response.write(content)
+            self.redirect('/welcome?username=' + username)
+
+class Welcome(webapp2.RequestHandler):
+    def get(self):
+        username = self.request.get('username')
+        content = "<h2>" + "Welcome " + username + "!" + "</h2>"
+        self.response.write(content)
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
+    ('/signup', SignUp),
     ('/welcome', Welcome)
 ], debug=True)
